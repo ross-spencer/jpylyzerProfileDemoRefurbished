@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-   Schematron jpylyzer schema: verify if JP2 conforms to 
+   Schematron jpylyzer schema: verify if JP2 conforms to
    a lossily compressed profile for access copies
    Johan van der Knijff, KB / National Library of the Netherlands , 3 September 2012.
    Based on original schema by Adam Retter, The National Archives
@@ -13,54 +13,59 @@
 
     <!-- check that the jpylyzer element exists -->
     <s:rule context="/">
-    <s:assert test="jpylyzer">no jpylyzer element found</s:assert>
+       <s:assert test="jpylyzer">no jpylyzer element found</s:assert>
     </s:rule>
 
-    <!-- check that isValidJP2 element exists with the text 'True' -->
+    <!-- check that a file element is exists -->
     <s:rule context="/jpylyzer">
-    <s:assert test="isValidJP2 = 'True'">no valid JP2</s:assert>
+       <s:assert test="file">no file element found</s:assert>
+    </s:rule>
+
+    <!-- check that isValid element exists with the text 'True' -->
+    <s:rule context="/jpylyzer/file">
+       <s:assert test="isValid = 'True'">no valid JP2</s:assert>
     </s:rule>
 
     <!-- Top-level properties checks -->
 
-    <s:rule context="/jpylyzer/properties">
+    <s:rule context="/jpylyzer/file/properties">
 
     <!-- check if XML box exists -->
     <s:assert test="xmlBox">no XML box</s:assert>
 
-    <!-- check if compression ratio doesn't exceed threshold value (a bit tricky as for images that 
-         don't contain much information very high compression ratios may be obtained without losing quality)  
+    <!-- check if compression ratio doesn't exceed threshold value (a bit tricky as for images that
+         don't contain much information very high compression ratios may be obtained without losing quality)
           -->
     <s:assert test="compressionRatio &lt; 35">Too much compression</s:assert>
     </s:rule>
 
     <!-- check if resolution box exists -->
-    <s:rule context="/jpylyzer/properties/jp2HeaderBox">
+    <s:rule context="/jpylyzer/file/properties/jp2HeaderBox">
     <s:assert test="resolutionBox">no resolution box</s:assert>
     </s:rule>
 
     <!-- check if resolution box contains capture resolution box -->
-    <s:rule context="/jpylyzer/properties/jp2HeaderBox/resolutionBox">
+    <s:rule context="/jpylyzer/file/properties/jp2HeaderBox/resolutionBox">
     <s:assert test="captureResolutionBox">no capture resolution box</s:assert>
     </s:rule>
 
     <!-- check that METH equals 'Restricted ICC' -->
-    <s:rule context="/jpylyzer/properties/jp2HeaderBox/colourSpecificationBox">
+    <s:rule context="/jpylyzer/file/properties/jp2HeaderBox/colourSpecificationBox">
       <s:assert test="meth = 'Restricted ICC'">METH not 'Restricted ICC'</s:assert>
     </s:rule>
 
     <!-- check X- and Y- tile sizes -->
-    <s:rule context="/jpylyzer/properties/contiguousCodestreamBox/siz">
+    <s:rule context="/jpylyzer/file/properties/contiguousCodestreamBox/siz">
     <s:assert test="xTsiz = '1024'">wrong X Tile size</s:assert>
     <s:assert test="yTsiz = '1024'">wrong Y Tile size</s:assert>
     </s:rule>
 
     <!-- checks on codestream COD parameters -->
-    <s:rule context="/jpylyzer/properties/contiguousCodestreamBox/cod">
+    <s:rule context="/jpylyzer/file/properties/contiguousCodestreamBox/cod">
 
     <!-- Precincts -->
     <s:assert test="precincts = 'yes'">no precincts</s:assert>
- 
+
     <!-- Error resilience features: sop, eph and segmentation symbols -->
     <s:assert test="sop = 'yes'">no start-of-packet headers</s:assert>
     <s:assert test="eph = 'yes'">no end-of-packet headers</s:assert>
@@ -73,7 +78,7 @@
     <s:assert test="layers = '8'">wrong number of layers</s:assert>
 
     <!-- Colour transformation (only for RGB images, i.e. number of components = 3)-->
-    <s:assert test="(multipleComponentTransformation = 'yes') and (../../jp2HeaderBox/imageHeaderBox/nC = '3') 
+    <s:assert test="(multipleComponentTransformation = 'yes') and (../../jp2HeaderBox/imageHeaderBox/nC = '3')
          or (multipleComponentTransformation = 'no') and (../../jp2HeaderBox/imageHeaderBox/nC = '1')">
                      no colour transformation</s:assert>
 
